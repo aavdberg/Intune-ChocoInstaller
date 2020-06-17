@@ -41,7 +41,10 @@ PARAM(
     [Parameter(Mandatory=$false)]
         [switch]$usermode,
     [Parameter(Mandatory=$false)]
-        [switch]$upgrade
+        [switch]$upgrade,
+    [Parameter(Mandatory=$false)]
+        [switch]$detection
+        
 )
 
 ######
@@ -67,9 +70,19 @@ if ($usermode) {
 
     # Default path to Chocolatey (machine wide)
     $ChocolateyInstall = "$($env:ProgramData)\Chocolatey" #\bin\choco.exe
-
 }
 
+if ($detection) {
+    # Detect if choco package is installed
+    $chocopackages = choco list --localonly
+    if ($chocopackages -ge $package) {
+    Write-Host "Installed"
+    Exit 
+    }
+    else {
+    Exit 
+    }
+    
 # Build path to executeable
 $Choco = "$ChocolateyInstall\bin\choco.exe"
 
@@ -79,16 +92,16 @@ if(!(Test-Path $Choco)) {
          Invoke-Expression ((New-Object net.webclient).DownloadString('https://chocolatey.org/install.ps1')) -ErrorAction stop
      }
      catch {
-         Throw ìFailed to install Chocolateyî
+         Throw ‚ÄúFailed to install Chocolatey‚Äù
      }       
 } else {
     # Try and upgrade chocolatey if it was already installed
     Write-Output "Trying to upgrade Chocolatey..."
     try {
-        Invoke-Expression ìcmd.exe /c $Choco upgrade chocolatey -yî -ErrorAction stop
+        Invoke-Expression ‚Äúcmd.exe /c $Choco upgrade chocolatey -y‚Äù -ErrorAction stop
     }
     catch {
-        Write-Output ìFailed to auto upgrade chocolateyî
+        Write-Output ‚ÄúFailed to auto upgrade chocolatey‚Äù
     }
 }
 
@@ -104,30 +117,30 @@ if($uninstall) {
 
     # Uninstall requested package
     try {
-        Invoke-Expression ìcmd.exe /c $Choco uninstall $package -yî -ErrorAction Stop
+        Invoke-Expression ‚Äúcmd.exe /c $Choco uninstall $package -y‚Äù -ErrorAction Stop
     }
     catch {
-        Throw ìFailed to uninstall $packageî
+        Throw ‚ÄúFailed to uninstall $package‚Äù
     }
 
 } elseif($upgrade) {
 
     # Upgrade requested package to latest approved version
     try {
-        Invoke-Expression ìcmd.exe /c $Choco upgrade $package -yî -ErrorAction Stop
+        Invoke-Expression ‚Äúcmd.exe /c $Choco upgrade $package -y‚Äù -ErrorAction Stop
     }
     catch {
-        Throw ìFailed to upgrade $packageî
+        Throw ‚ÄúFailed to upgrade $package‚Äù
     }
 
 } else {
 
     # Install requested package
     try {
-        Invoke-Expression ìcmd.exe /c $Choco Install $package -yî -ErrorAction Stop
+        Invoke-Expression ‚Äúcmd.exe /c $Choco Install $package -y‚Äù -ErrorAction Stop
     }
     catch {
-        Throw ìFailed to install $packageî
+        Throw ‚ÄúFailed to install $package‚Äù
     }
 
 }
